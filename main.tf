@@ -6,7 +6,7 @@ provider "azurerm" {
 # Se crea el grupo de recursos, al cual se asociarán los demás recursos
 resource "azurerm_resource_group" "rg" {
   name     = var.name_function
-  location = var.location
+  location = "eastus2"
 }
 
 # Se crea un Storage Account, para asociarlo al function app (recomendación de la documentación).
