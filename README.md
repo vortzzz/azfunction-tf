@@ -145,24 +145,24 @@ Para eliminar la infraestructura creada, se puede utilizar:
 terraform destroy --var-file="dev.tfvars" -auto-approve
 ```
 ---
-# Procedimiento: Despliegue de Azure Function con Terraform
+# Procedure: Azure Function Deployment with Terraform
 
-Documentación del proceso realizado para provisionar una **Azure Function App (Windows / Node.js ~18)** usando Terraform y Azure CLI.
+Documentation of the process performed to provision an **Azure Function App (Windows / Node.js ~18)** using Terraform and Azure CLI.
 
 ---
 
-## Recursos creados
+## Resources created
 
-| Recurso | Tipo Terraform | Nombre |
+| Resource | Terraform Type | Name |
 |---------|----------------|--------|
 | Resource Group | `azurerm_resource_group` | `otroxd` |
 | Storage Account | `azurerm_storage_account` | `otroxd` |
-| Service Plan (Consumo Y1) | `azurerm_service_plan` | `otroxd` |
+| Service Plan (Consumption Y1) | `azurerm_service_plan` | `otroxd` |
 | Windows Function App | `azurerm_windows_function_app` | `otroxd` |
 | Function (HTTP trigger) | `azurerm_function_app_function` | `otroxd` |
 
-- **Región:** `eastus2`
-- **URL de invocación:** `https://otroxd.azurewebsites.net/api/otroxd`
+- **Region:** `eastus2`
+- **Invocation URL:** `https://otroxd.azurewebsites.net/api/otroxd`
 - **Provider:** `hashicorp/azurerm` v5.4.0
 
 ---
@@ -170,20 +170,20 @@ Documentación del proceso realizado para provisionar una **Azure Function App (
 
 ---
 
-## Inicialización del proyecto (`terraform init`)
+## Project initialization (`terraform init`)
 
-Desde el directorio del proyecto (`azfunction-tf`):
+From the project directory (`azfunction-tf`):
 
 ```bash
 terraform init
 ```
 
-Este comando descarga el provider `azurerm`, crea `.terraform/` y genera el lock file `.terraform.lock.hcl`.
+This command downloads the `azurerm` provider, creates `.terraform/`, and generates the lock file `.terraform.lock.hcl`.
 
 
 ---
 
-## 3. Formateo del código (`terraform fmt`)
+## 3. Code formatting (`terraform fmt`)
 
 ```bash
 terraform fmt
@@ -193,43 +193,43 @@ terraform fmt
 ---
 
 
-## 6. Plan de ejecución (`terraform plan`)
+## 6. Execution plan (`terraform plan`)
 
 ```bash
 terraform plan
 ```
 
-Terraform solicita las variables definidas en `variables.tf`:
+Terraform prompts for the variables defined in `variables.tf`:
 
-- `name_function` → valor usado: `otroxd`
-- `location` → por defecto `West Europe` (luego se cambió en el código a `eastus2` por políticas de la suscripción)
+- `name_function` → value used: `otroxd`
+- `location` → defaults to `West Europe` (later changed in the code to `eastus2` due to subscription policies)
 
-El plan muestra los recursos que se crearán (Resource Group, Storage Account, Service Plan, Function App y Function).
+The plan shows the resources that will be created (Resource Group, Storage Account, Service Plan, Function App, and Function).
 
-> **Salida de `terraform plan`**
+> **`terraform plan` output**
 >
 > ![](https://cdn.phototourl.com/free/2026-09-06-e8af721f-83e6-49d1-9353-44a13d2a8f01.png)
 
 ---
 
 
-## Aplicación exitosa (`terraform apply`)
+## Successful apply (`terraform apply`)
 
 ```bash
 terraform apply
 ```
 
-Confirmar con `yes` cuando Terraform pida aprobación.
+Confirm with `yes` when Terraform asks for approval.
 
-Recursos provisionados correctamente:
+Resources provisioned successfully:
 
 1. Resource Group `otroxd`
 2. Storage Account `otroxd`
-3. Service Plan `otroxd` (SKU `Y1` — consumo)
+3. Service Plan `otroxd` (SKU `Y1` — consumption)
 4. Windows Function App `otroxd` (Node.js `~18`)
-5. Function HTTP `otroxd` (código desde `example/index.js`)
+5. HTTP Function `otroxd` (code from `example/index.js`)
 
-> **`terraform apply` completado (Apply complete!)**
+> **`terraform apply` completed (Apply complete!)**
 >
 > 
 >
@@ -238,7 +238,7 @@ Recursos provisionados correctamente:
 > ![](https://cdn.phototourl.com/free/2026-09-06-522966d9-111d-4bc8-9815-308aed947a2e.png)
 ---
 
-Salida obtenida:
+Output obtained:
 
 ```text
 url = "https://otroxd.azurewebsites.net/api/otroxd"
@@ -246,9 +246,9 @@ url = "https://otroxd.azurewebsites.net/api/otroxd"
 ![](https://cdn.phototourl.com/free/2026-09-06-637bb21b-9a09-49eb-b6c2-5b74c9adf599.png)
 ---
 
-## 11. Prueba de la Function
+## 11. Testing the Function
 
-### Por navegador o curl
+### Via browser or curl
 
 ```bash
 curl "https://otroxd.azurewebsites.net/api/otroxd?name=Azure"
@@ -256,76 +256,75 @@ curl "https://otroxd.azurewebsites.net/api/otroxd?name=Azure"
 
 ---
 
-## Resumen de comandos 
+## Command summary
 
 ```bash
-# 1. Instalar Terraform
+# 1. Install Terraform
 sudo apt update && sudo apt install terraform
 
-# 2. Inicializar
+# 2. Initialize
 terraform init
 
-# 3. Formatear
+# 3. Format
 terraform fmt
 
-# 4. Instalar Azure CLI (Para Ubuntu)
+# 4. Install Azure CLI (for Ubuntu)
 curl -fsSL 'https://azurecliprod.blob.core.windows.net/$root/deb_install.sh' | sudo bash 
 
-# 5. Autenticarse
+# 5. Authenticate
 az login
 
-# 6. Planificar
+# 6. Plan
 terraform plan
 
-# 7. (Si falla por ubicación) consultar políticas y ajustar location a eastus2 en main.tf
+# 7. (If it fails due to location) check policies and set location to eastus2 in main.tf
 az policy assignment list --query "[?contains(displayName, 'Allowed locations') || contains(displayName, 'regions')].parameters"
 
-# 8. (Si falla por provider) registrar Microsoft.Storage
+# 8. (If it fails due to provider) register Microsoft.Storage
 az provider register --namespace Microsoft.Storage
 az provider show -n Microsoft.Storage --query "registrationState"
 
-# 9. Aplicar
+# 9. Apply
 terraform apply
 
-# 10. Ver URL
+# 10. View URL
 terraform output
 
-# 11. Probar
+# 11. Test
 curl "https://otroxd.azurewebsites.net/api/otroxd?name=Azure"
 ```
 
 ---
 
-## Destrucción (opcional)
+## Destroy (optional)
 
-Para eliminar toda la infraestructura creada:
+To remove all the infrastructure created:
 
 ```bash
 terraform destroy
 ```
 
 
-## Estructura del proyecto
+## Project structure
 
 ```text
 azfunction-tf/
-├── main.tf                 # Recursos Azure (RG, Storage, Plan, Function App, Function)
+├── main.tf                 # Azure resources (RG, Storage, Plan, Function App, Function)
 ├── variables.tf            # Variables: name_function, location
-├── outputs.tf              # Output: URL de invocación
+├── outputs.tf              # Output: invocation URL
 ├── example/
-│   └── index.js            # Código de la Function (HTTP trigger)
-├── .terraform/             # Provider descargado (generado por init)
-├── .terraform.lock.hcl     # Lock de versiones del provider
-├── terraform.tfstate       # Estado actual de la infraestructura
-└── PROCEDIMIENTO.md        # Este documento
+│   └── index.js            # Function code (HTTP trigger)
+├── .terraform/             # Downloaded provider (generated by init)
+├── .terraform.lock.hcl     # Provider version lock
+├── terraform.tfstate       # Current state of the infrastructure
+└── PROCEDIMIENTO.md        # This document
 ```
 
 ---
 
-## Notas
+## Notes
 
-- El nombre `name_function` debe ser único a nivel global en Azure (Storage Account y Function App).
-- `sku_name = "Y1"` corresponde al plan de **consumo**.
-- El trigger HTTP está configurado con `authLevel: anonymous` (GET y POST).
-- Si la suscripción restringe regiones, usar una ubicación permitida (en este caso `eastus2`).
-
+- The `name_function` name must be globally unique in Azure (Storage Account and Function App).
+- `sku_name = "Y1"` corresponds to the **consumption** plan.
+- The HTTP trigger is configured with `authLevel: anonymous` (GET and POST).
+- If the subscription restricts regions, use an allowed location (in this case `eastus2`).
